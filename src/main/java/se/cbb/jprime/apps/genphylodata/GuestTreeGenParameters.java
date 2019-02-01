@@ -105,6 +105,10 @@ public class GuestTreeGenParameters {
 			" The transfer rate parameter will be ignored (i.e., set to 0). The additional parameters refer to a change-factor applied to the parameters for a limited time following a hybrid speciation.")
 	public List<String> hybrid = null;
 	
+	/** Non-root start of evolution- */
+	@Parameter(names = {"-root", "--rootID"}, description = "Assign root for start of evolution...")
+	public Integer rootID = null;
+	
 	/**
 	 * Returns output and info streams.
 	 * @return streams.
@@ -126,7 +130,7 @@ public class GuestTreeGenParameters {
 		} else {
 			host = PrIMENewickTreeReader.readTree(args.get(0), false, true);
 		}
-		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getLeafSamplingProb(), this.getStem());
+		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getLeafSamplingProb(), this.getStem(), this.rootID);
 	}
 	
 	public double getDuplicationRate() {

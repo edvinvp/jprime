@@ -43,6 +43,52 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	/** Sampling probability. */
 	private double rho;
 	
+	/** Start of evolution JPrIME newick root ID */
+	private Integer rootID;
+	
+	/**
+	 * Constructor.
+	 * @param host host tree.
+	 * @param lambda duplication rate.
+	 * @param mu loss rate.
+	 * @param tau transfer rate.
+	 * @param rho probability of sampling leaf.
+	 * @param rootID custom start of evolution node.
+	 * @throws TopologyException.
+	 * @throws NewickIOException.
+	 */
+	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double rho, Double stem, Integer rootID) throws TopologyException, NewickIOException {
+		
+		// Host tree.
+		RBTree S = new RBTree(host, "HostTree");
+		TimesMap hostTimes = host.getTimesMap("HostTimes");
+		this.hostNames = host.getVertexNamesMap(true, "HostNames");
+		if (stem != null) {
+			hostTimes.getArcTimes()[S.getRoot()] = stem;
+		}
+		// Hack: Set 0 stem to eps.
+		if (hostTimes.getArcTime(S.getRoot()) <= 0.0) {
+			hostTimes.getArcTimes()[S.getRoot()] = 1.0e-64;
+		}
+		this.hostTree = new RBTreeEpochDiscretiser(S, hostNames, hostTimes);
+		// generate epoch and arc id information for each edge of the species tree. this is useful when doing sampling realization from DLTRS model
+		
+		
+		// Rates.
+		this.lambda = lambda;
+		this.mu = mu;
+		this.tau = tau;
+		this.rho = rho;
+		if (lambda < 0 || mu < 0 || tau < 0) {
+			throw new IllegalArgumentException("Cannot have rate less than 0.");
+		}
+		if (rho < 0 || rho > 1) {
+			throw new IllegalArgumentException("Cannot have leaf sampling probability outside [0,1].");
+		}
+		
+		this.rootID = rootID;
+	}
+	
 	/**
 	 * Constructor.
 	 * @param host host tree.
@@ -69,7 +115,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		this.hostTree = new RBTreeEpochDiscretiser(S, hostNames, hostTimes);
 		
 		// generate epoch and arc id information for each edge of the species tree. this is useful when doing sampling realization from DLTRS model
-		
+	
 		
 		// Rates.
 		this.lambda = lambda;
@@ -82,22 +128,28 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		if (rho < 0 || rho > 1) {
 			throw new IllegalArgumentException("Cannot have leaf sampling probability outside [0,1].");
 		}
+		
+		this.rootID = null;
 	}
-	
 	
 	@Override
 	public GuestVertex createUnprunedTree(PRNG prng) {
-		
 		// Currently processed lineages.
 		LinkedList<GuestVertex> alive = new LinkedList<GuestVertex>();
 		
 		// Single lineage at tip.
-		GuestVertex root = this.createGuestVertex(hostTree.getRoot(), hostTree.getTipToLeafTime(), prng);
+		GuestVertex root;
+		if (this.rootID != null) {
+			root = this.createGuestVertex(this.rootID, hostTree.getTipToLeafTime(this.rootID), prng);
+		} else {
+			root = this.createGuestVertex(hostTree.getRoot(), hostTree.getTipToLeafTime(), prng);
+		}
 		alive.add(root);
 		
 		// Recursively process lineages.
 		while (!alive.isEmpty()) {
 			GuestVertex lin = alive.pop();
+			
 			if (lin.event == Event.LOSS || lin.event == Event.LEAF || lin.event == Event.UNSAMPLED_LEAF) {
 				// Lineage ends.
 				continue;	
@@ -140,7 +192,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 //				}
 				
 				// changes at feb 23 2015. starts
-				
+
 				if (prng.nextDouble() < 0.5) {
 					// we need to fix this, select an incident arc of species tree randomly (mehmood)
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
@@ -148,7 +200,6 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					lin.setTransferedFromArc(lin.sigma);
 					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);			
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
-					
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
 					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma));
@@ -189,7 +240,13 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @return guest vertex.
 	 */
 	private GuestVertex createGuestVertex(int X, double startTime, PRNG prng) {
-		boolean isRoot = this.hostTree.isRoot(X);
+		boolean isRoot;
+		if (this.rootID == null) {
+			isRoot = this.hostTree.isRoot(X);
+		} else  {
+			isRoot = (X == this.rootID) ? true : false;
+		}
+		
 		double sum = isRoot ? this.lambda + this.mu : this.lambda + this.mu + this.tau;
 		if (sum == 0.0) { sum = 1e-48; }
 		ExponentialDistribution pd = new ExponentialDistribution(sum);

@@ -140,7 +140,6 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public void update() {
 		epochs = new Epoch[(S.getNoOfVertices()+1)/2];
 		splits = new int[epochs.length];
-		
 		// Lowermost epoch contains all leaf arcs. Use these as starting point.
 		LinkedList<Integer> q = new LinkedList<Integer>();
 		addLeavesLeftToRight(q, S.getRoot());
@@ -222,6 +221,15 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	 */
 	public double getRootToLeafTime() {
 		return epochs[epochs.length-1].getLowerTime();
+	}
+	
+	/**
+	 * Returns the discretised vert-to-leaf time.
+	 * @param vertNo vertex to return vert-to-leaf time. 
+	 * @return the discretised vertex-to-leaf time.
+	 */
+	public double getTipToLeafTime(int vertNo) {
+		return epochs[this.vertexToEpoch.get(vertNo)].getUpperTime();
 	}
 	
 	/**
