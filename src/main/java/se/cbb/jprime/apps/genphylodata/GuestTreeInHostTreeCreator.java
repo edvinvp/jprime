@@ -240,12 +240,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @return guest vertex.
 	 */
 	private GuestVertex createGuestVertex(int X, double startTime, PRNG prng) {
-		boolean isRoot;
-		if (this.rootID == null) {
-			isRoot = this.hostTree.isRoot(X);
-		} else  {
-			isRoot = (X == this.rootID) ? true : false;
-		}
+		boolean isRoot = this.hostTree.isRoot(X);
 		
 		double sum = isRoot ? this.lambda + this.mu : this.lambda + this.mu + this.tau;
 		if (sum == 0.0) { sum = 1e-48; }
