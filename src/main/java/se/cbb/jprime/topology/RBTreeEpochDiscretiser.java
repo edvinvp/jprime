@@ -229,7 +229,14 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	 * @return the discretised vertex-to-leaf time.
 	 */
 	public double getTipToLeafTime(int vertNo) {
-		return epochs[this.vertexToEpoch.get(vertNo)].getUpperTime();
+		// The tipToLeafTime for a vertex of the tree is the lowerTime of
+		// the epoch of it's parent, except if the vertex is the root.
+		int parent = S.parents[vertNo];
+		if (S.isRoot(vertNo)) {
+			return epochs[epochs.length-1].getUpperTime();
+		} else {
+			return epochs[this.vertexToEpoch.get(parent)].getLowerTime();
+		}
 	}
 	
 	/**
