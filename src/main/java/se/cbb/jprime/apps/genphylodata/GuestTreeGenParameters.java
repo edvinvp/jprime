@@ -106,8 +106,20 @@ public class GuestTreeGenParameters {
 	public List<String> hybrid = null;
 	
 	/** Non-root start of evolution- */
-	@Parameter(names = {"-root", "--rootID"}, description = "Assign root for start of evolution...")
-	public Integer rootID = null;
+	@Parameter(names = {"-nonroot", "--randomStartVertexID"}, description = "Assign vertex for start of evolution using the extended Newick format ID [&&PRIME ID=...]. The simulation starts from the top of the branch into the vertex.")
+	public Integer randomStartVertexID = null;
+	
+	/** Randomized simulation start */
+	@Parameter(names = {"-randomStart"}, description = "Randomizes simulation start vertex in the host tree uniformly over the host tree tip to leaf time")
+	boolean randomStart = false;
+	
+	/** Uniform distribution on [lower,upper] for selecting randomized start vertex */
+	@Parameter(names = {"-upperTime", "--randomStartUpperTime"}, description = "The upper boundary for the uniform distribrution used for selecting simulation start when using -randomStart")
+	String randomStartUpperTime = "-1.0";
+	
+	/** Uniform distribution on [lower,upper] for selecting randomized start vertex */
+	@Parameter(names = {"-lowerTime", "--randomStartLowerTime"}, description = "The lower boundary for the uniform distribution used for selecting simulation start when using -randomStart")
+	String randomStartLowerTime = "-1.0";
 	
 	/**
 	 * Returns output and info streams.
@@ -130,7 +142,7 @@ public class GuestTreeGenParameters {
 		} else {
 			host = PrIMENewickTreeReader.readTree(args.get(0), false, true);
 		}
-		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getLeafSamplingProb(), this.getStem(), this.rootID);
+		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getLeafSamplingProb(), this.getStem(), this.randomStartVertexID);
 	}
 	
 	public double getDuplicationRate() {

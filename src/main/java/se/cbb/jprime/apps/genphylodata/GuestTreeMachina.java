@@ -34,6 +34,9 @@ public class GuestTreeMachina {
 	private boolean excludeMeta;
 	private int attempts;
 	private boolean appendSigma;
+	private boolean randomizeStart;
+	private double lowerRandomStartTime;
+	private double upperRandomStartTime;
 	
 	/**
 	 * Constructor.
@@ -47,8 +50,13 @@ public class GuestTreeMachina {
 	 * @param vertexPrefix vertex name prefix.
 	 * @param excludeMeta true to exclude meta info.
 	 * @param appendSigma appends the sigma to the name.
+	 * @param randomizeStart randomize starting vertex.
+	 * @param lowerRandsomStart lower boundary for the uniform distribution used for finding random start vertex.
+	 * @param upperRandomStart upper boundary for the uniform distribution used for finding random start vertex.
 	 */
-	protected GuestTreeMachina(String seed, int min, int max, int minper, int maxper, List<Integer> leafSizes, int maxAttempts, String vertexPrefix, boolean excludeMeta, boolean appendSigma) {
+	protected GuestTreeMachina(String seed, int min, int max, int minper, int maxper, List<Integer> leafSizes,
+								int maxAttempts, String vertexPrefix, boolean excludeMeta, boolean appendSigma,
+								boolean randomizeStart, double lowerRandomStartTime, double upperRandomStartTime) {
 		this.prng = (seed == null ? new PRNG() : new PRNG(new BigInteger(seed)));
 		this.min = min;
 		this.max = max;
@@ -60,6 +68,9 @@ public class GuestTreeMachina {
 		this.excludeMeta = excludeMeta;
 		this.attempts = 0;
 		this.appendSigma = appendSigma;
+		this.randomizeStart = randomizeStart;
+		this.lowerRandomStartTime = lowerRandomStartTime;
+		this.upperRandomStartTime = upperRandomStartTime;
 	}
 		
 	/**
@@ -71,6 +82,11 @@ public class GuestTreeMachina {
 	 * @throws MaxAttemptsException.
 	 */
 	public Pair<PrIMENewickTree,PrIMENewickTree> sampleGuestTree(UnprunedGuestTreeCreator mightyGodPlaysDice) throws NewickIOException, TopologyException, MaxAttemptsException {
+		
+		// Randomize start vertex if wanted
+		if (this.randomizeStart) {
+			mightyGodPlaysDice.randomizeSimulationStart(this.prng, this.lowerRandomStartTime, this.upperRandomStartTime);
+		}
 		
 		this.attempts = 0;
 		List<Integer> hostLeaves = mightyGodPlaysDice.getHostLeaves();

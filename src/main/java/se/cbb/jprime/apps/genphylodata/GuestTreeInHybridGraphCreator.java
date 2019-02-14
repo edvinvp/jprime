@@ -404,4 +404,13 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 	public String getHost() {
 		return this.hostGraph.toString();
 	}
+	
+	/**
+	 * Not supported for hybrid host tree
+	 * @param prng PRNG
+	 */
+	@Override
+	public void randomizeSimulationStart(PRNG prng, double lowerBoundary, double upperBoundary) {
+		System.out.println("Randomized simulation start is not supported for hybrid host tree");
+	}
 }

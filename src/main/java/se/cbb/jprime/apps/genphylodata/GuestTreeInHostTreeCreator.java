@@ -44,7 +44,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	private double rho;
 	
 	/** Start of evolution JPrIME newick root ID */
-	private Integer rootID;
+	private Integer randomStartVertexID;
 	
 	/**
 	 * Constructor.
@@ -53,11 +53,11 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @param mu loss rate.
 	 * @param tau transfer rate.
 	 * @param rho probability of sampling leaf.
-	 * @param rootID custom start of evolution node.
+	 * @param randomStartVertexID custom start of evolution node.
 	 * @throws TopologyException.
 	 * @throws NewickIOException.
 	 */
-	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double rho, Double stem, Integer rootID) throws TopologyException, NewickIOException {
+	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double rho, Double stem, Integer randomStartVertexID) throws TopologyException, NewickIOException {
 		
 		// Host tree.
 		RBTree S = new RBTree(host, "HostTree");
@@ -86,7 +86,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			throw new IllegalArgumentException("Cannot have leaf sampling probability outside [0,1].");
 		}
 		
-		this.rootID = rootID;
+		this.randomStartVertexID = randomStartVertexID;
 	}
 	
 	/**
@@ -129,18 +129,53 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			throw new IllegalArgumentException("Cannot have leaf sampling probability outside [0,1].");
 		}
 		
-		this.rootID = null;
+		this.randomStartVertexID = null;
 	}
 	
+	/**
+	 * Randomizes simulation start. Selects a vertex from the host tree uniformly over [lowerTime, upperTime]
+	 * if both lowerTime and upperTIme = -1 (default values) then use [0,upperTime]
+	 * where totalTime is the total time span of the host tree.
+	 * @param prng PRNG
+	 */
+	@Override
+	public void randomizeSimulationStart(PRNG prng, double lowerTime, double upperTime) {
+		
+		double totalTime = this.hostTree.getTipToLeafTime();
+		// No specified time interval
+		if (lowerTime == -1 && upperTime == -1) {
+			lowerTime = 0;
+			upperTime = totalTime;
+		} else if (lowerTime == -1) {
+			// only upper time specified
+			lowerTime = 0;
+		} else if (upperTime == -1) {
+			// only upper time specified
+			upperTime = totalTime;
+		}
+		
+		// Incorrect interval
+		if ((lowerTime > upperTime) || (lowerTime < 0) || (upperTime < 0) || (upperTime > totalTime)) {
+			System.out.println("Input boundaries [" + lowerTime + "," + upperTime + "] incorrect. \n"
+					+ "defaulting to [0," + totalTime + "]");
+			lowerTime = 0;
+			upperTime = totalTime;
+		}
+		
+		double range = upperTime - lowerTime;
+		double timeStart = (prng.nextDouble() * range) + lowerTime;	
+		int vert = this.hostTree.getVertexClosestToEpochTime(timeStart, prng);
+		this.randomStartVertexID = vert;
+	}
+
 	@Override
 	public GuestVertex createUnprunedTree(PRNG prng) {
 		// Currently processed lineages.
 		LinkedList<GuestVertex> alive = new LinkedList<GuestVertex>();
-		
 		// Single lineage at tip.
 		GuestVertex root;
-		if (this.rootID != null) {
-			root = this.createGuestVertex(this.rootID, hostTree.getTipToLeafTime(this.rootID), prng);
+		if (this.randomStartVertexID != null) {
+			root = this.createGuestVertex(this.randomStartVertexID, hostTree.getTipToLeafTime(this.randomStartVertexID), prng);
 		} else {
 			root = this.createGuestVertex(hostTree.getRoot(), hostTree.getTipToLeafTime(), prng);
 		}

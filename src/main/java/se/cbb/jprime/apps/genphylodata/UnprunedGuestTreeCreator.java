@@ -54,4 +54,13 @@ public interface UnprunedGuestTreeCreator {
 	
 	public NamesMap getHostNames();
 	
+	/**
+	 * Randomizes simulation start. Selects a vertex from the host tree uniformly over [0,totalTime]
+	 * where totalTime is the total timespan of the host tree.
+	 * @param prng PRNG
+	 * @param lowerBoundary lower time boundary for simulation start. 0 is the leafs values.
+	 * @param upperBoundary upper time boundary for simulation start.
+	 */
+	public void randomizeSimulationStart(PRNG prng, double lowerBoundary, double upperBoundary);
+	
 }

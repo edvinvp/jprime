@@ -83,7 +83,8 @@ public class HostTreeGen implements JPrIMEApp {
 			// Machine.
 			int minper = (params.bifurcationStart ? 1 : 0);
 			GuestTreeMachina machine = new GuestTreeMachina(params.seed, params.min, params.max, minper, Integer.MAX_VALUE, params.getLeafSizes(), params.maxAttempts,
-						params.vertexPrefix, params.excludeMeta, false);
+						params.vertexPrefix, params.excludeMeta, false, params.randomStart, Double.parseDouble(params.randomStartLowerTime),
+						Double.parseDouble(params.randomStartUpperTime));
 			
 			// Primus motor.
 			GuestTreeInHostTreeCreator motor = new GuestTreeInHostTreeCreator(host, params.getBirthRate(), params.getDeathRate(), 0.0, params.getLeafSamplingProb(), null);

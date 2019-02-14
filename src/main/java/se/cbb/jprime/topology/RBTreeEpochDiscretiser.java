@@ -7,6 +7,7 @@ import java.util.Map;
 
 import se.cbb.jprime.io.NewickIOException;
 import se.cbb.jprime.io.NewickTreeWriter;
+import se.cbb.jprime.math.PRNG;
 import se.cbb.jprime.mcmc.ChangeInfo;
 import se.cbb.jprime.mcmc.Dependent;
 import se.cbb.jprime.mcmc.InfoProvider;
@@ -136,7 +137,6 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	/**
 	 * Updates the discretisation based on the underlying host tree.
 	 */
-	
 	public void update() {
 		epochs = new Epoch[(S.getNoOfVertices()+1)/2];
 		splits = new int[epochs.length];
@@ -686,6 +686,34 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	 */
 	public List<Integer> getLeaves() {
 		return this.S.getLeaves();
+	}
+	
+	/**
+	 * Returns the vertex that is closest to the given time. If there are more than one, pick one randomly.
+	 * @param time the time
+	 * @param prng PRNG
+	 * @return the vertex closest to the given time.
+	 */
+	public int getVertexClosestToEpochTime(double time, PRNG prng) {
+		List<Integer> closestVertices = null;
+		List<Integer> vertices = S.getTopologicalOrdering();
+		double closestDistance = -1;
+		for (Integer v : vertices) {
+			double vLowTime = this.epochs[this.vertexToEpoch.get(v)].getLowerTime();
+			double dist = Math.abs(time - vLowTime);
+			if (dist == closestDistance) {
+				closestVertices.add(v);
+			} else if (dist < closestDistance || closestVertices == null) {
+				closestVertices = new LinkedList<Integer>();
+				closestDistance = dist;
+				closestVertices.add(v);
+			}
+		}
+		
+		// If closestVertices contains more than one element, pick one randomly
+		int idx = prng.nextInt(closestVertices.size());
+		
+		return closestVertices.get(idx);
 	}
 	
 }
