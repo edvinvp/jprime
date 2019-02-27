@@ -73,18 +73,6 @@ public class HostTreeGenParameters {
 	@Parameter(names = {"-vp", "--vertex-prefix"}, description = "Vertex prefix.")
 	public String vertexPrefix = "H";
 	
-	/** Randomized simulation start */
-	@Parameter(names = {"-randomStart"}, description = "Randomizes simulation start vertex in the host tree uniformly over the host tree tip to leaf time")
-	boolean randomStart = false;
-	
-	/** Uniform distribution on [lower,upper] for selecting randomized start vertex */
-	@Parameter(names = {"-upperTime", "--randomStartUpperTime"}, description = "The upper boundary for the uniform distribrution used for selecting simulation start when using -randomStart")
-	String randomStartUpperTime = "-1.0";
-	
-	/** Uniform distribution on [lower,upper] for selecting randomized start vertex */
-	@Parameter(names = {"-lowerTime", "--randomStartLowerTime"}, description = "The lower boundary for the uniform distribution used for selecting simulation start when using -randomStart")
-	String randomStartLowerTime = "-1.0";
-	
 	/**
 	 * Returns output and info streams.
 	 * @return streams.

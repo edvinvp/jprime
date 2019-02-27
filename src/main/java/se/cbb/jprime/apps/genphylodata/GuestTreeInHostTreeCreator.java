@@ -139,7 +139,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @param prng PRNG
 	 */
 	@Override
-	public void randomizeSimulationStart(PRNG prng, double lowerTime, double upperTime) {
+	public void randomizeSimulationStart(PRNG prng, double lowerTime, double upperTime, boolean excludeRoot) {
 		
 		double totalTime = this.hostTree.getTipToLeafTime();
 		// No specified time interval
@@ -164,7 +164,15 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		
 		double range = upperTime - lowerTime;
 		double timeStart = (prng.nextDouble() * range) + lowerTime;	
-		int vert = this.hostTree.getVertexClosestToEpochTime(timeStart, prng);
+		int vert = -1;
+		if (excludeRoot) {
+			do {
+				vert = this.hostTree.getVertexClosestToEpochTime(timeStart, prng);
+			} while (vert == this.hostTree.getRoot());
+		} else {
+			vert = this.hostTree.getVertexClosestToEpochTime(timeStart, prng);
+		}
+		
 		this.randomStartVertexID = vert;
 	}
 

@@ -75,7 +75,8 @@ public class GuestTreeGen implements JPrIMEApp {
 			GuestTreeMachina machina = new GuestTreeMachina(params.seed, params.min, params.max, params.minper,
 										params.maxper, params.getLeafSizes(), params.maxAttempts,
 										params.vertexPrefix, params.excludeMeta, params.appendSigma,
-										params.randomStart, Double.parseDouble(params.randomStartLowerTime),
+										params.randomStart, params.nonRootRandomStart,
+										Double.parseDouble(params.randomStartLowerTime),
 										Double.parseDouble(params.randomStartUpperTime));
 			
 			// Machine motor.

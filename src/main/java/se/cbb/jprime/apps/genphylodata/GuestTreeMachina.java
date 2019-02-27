@@ -35,6 +35,7 @@ public class GuestTreeMachina {
 	private int attempts;
 	private boolean appendSigma;
 	private boolean randomizeStart;
+	private boolean nonRootRandomizeStart;
 	private double lowerRandomStartTime;
 	private double upperRandomStartTime;
 	
@@ -50,13 +51,15 @@ public class GuestTreeMachina {
 	 * @param vertexPrefix vertex name prefix.
 	 * @param excludeMeta true to exclude meta info.
 	 * @param appendSigma appends the sigma to the name.
-	 * @param randomizeStart randomize starting vertex.
+	 * @param randomizeStart randomize starting vertex over all vertices.
+	 * @param nonRootRandomizeStart randomize starting vertex over all vertices excluding the root.
 	 * @param lowerRandsomStart lower boundary for the uniform distribution used for finding random start vertex.
 	 * @param upperRandomStart upper boundary for the uniform distribution used for finding random start vertex.
 	 */
 	protected GuestTreeMachina(String seed, int min, int max, int minper, int maxper, List<Integer> leafSizes,
 								int maxAttempts, String vertexPrefix, boolean excludeMeta, boolean appendSigma,
-								boolean randomizeStart, double lowerRandomStartTime, double upperRandomStartTime) {
+								boolean randomizeStart, boolean nonRootRandomizeStart,
+								double lowerRandomStartTime, double upperRandomStartTime) {
 		this.prng = (seed == null ? new PRNG() : new PRNG(new BigInteger(seed)));
 		this.min = min;
 		this.max = max;
@@ -69,6 +72,7 @@ public class GuestTreeMachina {
 		this.attempts = 0;
 		this.appendSigma = appendSigma;
 		this.randomizeStart = randomizeStart;
+		this.nonRootRandomizeStart = nonRootRandomizeStart;
 		this.lowerRandomStartTime = lowerRandomStartTime;
 		this.upperRandomStartTime = upperRandomStartTime;
 	}
@@ -85,8 +89,11 @@ public class GuestTreeMachina {
 		
 		// Randomize start vertex if wanted
 		if (this.randomizeStart) {
-			mightyGodPlaysDice.randomizeSimulationStart(this.prng, this.lowerRandomStartTime, this.upperRandomStartTime);
+			mightyGodPlaysDice.randomizeSimulationStart(this.prng, this.lowerRandomStartTime, this.upperRandomStartTime, false);
+		} else if (this.nonRootRandomizeStart) {
+			mightyGodPlaysDice.randomizeSimulationStart(this.prng, this.lowerRandomStartTime, this.upperRandomStartTime, true);
 		}
+			
 		
 		this.attempts = 0;
 		List<Integer> hostLeaves = mightyGodPlaysDice.getHostLeaves();

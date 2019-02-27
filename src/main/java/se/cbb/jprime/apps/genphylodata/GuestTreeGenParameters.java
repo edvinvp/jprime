@@ -110,15 +110,18 @@ public class GuestTreeGenParameters {
 	public Integer randomStartVertexID = null;
 	
 	/** Randomized simulation start */
-	@Parameter(names = {"-randomStart"}, description = "Randomizes simulation start vertex in the host tree uniformly over the host tree tip to leaf time")
+	@Parameter(names = {"-randomstart"}, description = "Randomizes simulation start vertex in the host tree uniformly over the host tree tip to leaf time.")
 	boolean randomStart = false;
 	
+	@Parameter(names = {"-nonrootrandomstart"}, description = "Randomizes simulation start vertex in the host tree uniformly over the closest epoch to the root to leaf time.")
+	boolean nonRootRandomStart = false;
+	
 	/** Uniform distribution on [lower,upper] for selecting randomized start vertex */
-	@Parameter(names = {"-upperTime", "--randomStartUpperTime"}, description = "The upper boundary for the uniform distribrution used for selecting simulation start when using -randomStart")
+	@Parameter(names = {"-uppertime", "--randomStartUpperTime"}, description = "The upper boundary for the uniform distribrution used for selecting simulation start when using -randomStart")
 	String randomStartUpperTime = "-1.0";
 	
 	/** Uniform distribution on [lower,upper] for selecting randomized start vertex */
-	@Parameter(names = {"-lowerTime", "--randomStartLowerTime"}, description = "The lower boundary for the uniform distribution used for selecting simulation start when using -randomStart")
+	@Parameter(names = {"-lowertime", "--randomStartLowerTime"}, description = "The lower boundary for the uniform distribution used for selecting simulation start when using -randomStart")
 	String randomStartLowerTime = "-1.0";
 	
 	/**

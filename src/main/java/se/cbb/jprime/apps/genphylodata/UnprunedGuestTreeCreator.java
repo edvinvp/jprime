@@ -60,7 +60,9 @@ public interface UnprunedGuestTreeCreator {
 	 * @param prng PRNG
 	 * @param lowerBoundary lower time boundary for simulation start. 0 is the leafs values.
 	 * @param upperBoundary upper time boundary for simulation start.
+	 * @param excludeRoot excludes the root root as a candidate for random start.
+	 * 					  Select vertex uniformly over [0,totalTime - time into root].
 	 */
-	public void randomizeSimulationStart(PRNG prng, double lowerBoundary, double upperBoundary);
+	public void randomizeSimulationStart(PRNG prng, double lowerBoundary, double upperBoundary, boolean excludeRoot);
 	
 }
